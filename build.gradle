@@ -1,0 +1,41 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.io.gatling.gradle:gatling-gradle-plugin:3.4.1"
+    }
+}
+
+apply plugin: 'scala'
+apply plugin: 'groovy'
+apply plugin: "io.gatling.gradle"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Gatling dependencies
+    compile 'io.gatling:gatling-app:3.4.1'
+    compile 'io.gatling.highcharts:gatling-charts-highcharts:3.4.1'
+    compile 'org.scala-lang:scala-compiler:2.12.10'
+    compile 'org.scala-lang:scala-library:2.12.10'
+}
+
+sourceCompatibility = 1.8
+version = '1.0'
+
+task runLoadtest(type: JavaExec) {
+    systemProperty 'users', "${System.getProperty("users") ?: 1}"
+    systemProperty 'seconds', "${System.getProperty("seconds") ?: 10}"
+    systemProperty 'URL', "${System.getProperty("URL") ?: "http://demo:8888"}"
+    systemProperty 'logback.configurationFile', 'logback.xml'
+
+    classpath = sourceSets.test.runtimeClasspath + files('config/')
+    main = "io.gatling.app.Gatling"
+
+    args = Eval.me("['-s','sdu.DemoSimulation']")
+}

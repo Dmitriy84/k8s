@@ -1,0 +1,38 @@
+# Deploys a small web server to view the gatling results
+# This works by mounting the results directory on the same volume as gatling
+kind: Pod
+apiVersion: v1
+metadata:
+  name: web
+  labels:
+    name: gatling-results
+spec:
+    containers:
+    - name: web
+      image: my-httpd:0.7
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 8081
+      volumeMounts:
+        - name: perftest-results
+          mountPath: /usr/local/apache2/htdocs
+          readOnly: false
+    volumes:
+    - name: perftest-results
+      hostPath:
+        path: /data/perftest-results
+
+# expose results server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatling-results
+spec:
+  type: NodePort
+  ports:
+    - port: 8081
+      protocol: TCP
+      name:  port8081
+  selector:
+    name: gatling-results

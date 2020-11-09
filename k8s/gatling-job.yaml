@@ -1,0 +1,24 @@
+# This is a one shot job to run our performance test and write the results out to a volume
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gatling
+spec:
+  template:
+    metadata:
+      name: gatling
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: gatling
+        image: citi.cloud.gatling:0.3
+        imagePullPolicy: IfNotPresent
+        command: ["gradle", "rL"]
+        volumeMounts:
+          - name: perftest-results
+            mountPath: /opt/gatling/results
+      # Note that a hostPath volume will only work on a single node cluster- like minikube
+      volumes:
+      - name: perftest-results
+        hostPath:
+          path: /data/perftest-results
